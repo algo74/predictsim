@@ -1,9 +1,0 @@
-#!/bin/bash
-echo $1
-l=`cat $1 | wc -l`
-N=$(echo "scale=0;$l/4" |bc)
-M=$(echo "scale=0;$l/100" |bc)
-n=$(tail -n $N $1 | awk '{ total += $1; count++ } END { print total/count }')
-m=$(tail -n $M $1 | awk '{ total += $1; count++ } END { print total/count }')
-echo Mean of $N last values is $n
-echo Mean of $M last values is $m

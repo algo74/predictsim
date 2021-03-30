@@ -1,2 +1,0 @@
-#!/bin/bash
-sort -k7 -n $1
