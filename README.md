@@ -1,9 +1,18 @@
 Modified scheduling simulator
 ==============================
 
-based on SC'15 submission [Improving Backfilling by using Machine Learning to predict Running Times](http://freux.fr/papers/SC15_backfilling_with_ML_runtime_predictions.pdf)
 
-Some files from the original repository do not work properly anymore
+
+based on SC'15 submission [Improving Backfilling by using Machine Learning to predict Running Times](http://freux.fr/papers/SC15_backfilling_with_ML_runtime_predictions.pdf).
+Some files from the original repository do not work properly anymore.
+
+
+License
+-------
+
+Because the simulator uses `pyss` (https://code.google.com/archive/p/pyss/), which was published under GNU GPL v2 license,
+the additions are published under the same license.
+
 
 Changelog
 ---------
