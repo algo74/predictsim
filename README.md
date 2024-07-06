@@ -1,9 +1,11 @@
-Modified scheduling simulator
+CP and List Scheduling Simulator
 ==============================
 
+This repository contains source for the paper "Job Scheduling for HPC Clusters: Constraint Programming vs. Backfilling Approaches" (presented at DEBS'2024). DOI: [10.1145/3629104.3666038](https://dx.doi.org/10.1145%2F3629104.3666038)
 
 
-based on SC'15 submission [Improving Backfilling by using Machine Learning to predict Running Times](http://freux.fr/papers/SC15_backfilling_with_ML_runtime_predictions.pdf).
+The simulator is based on SC'2015 [Improving Backfilling by using Machine Learning to predict Running Times](http://freux.fr/papers/SC15_backfilling_with_ML_runtime_predictions.pdf)
+and SBACPAD'2022 [Metrics for Packing Efficiency and Fairness of HPC Cluster Batch Job Scheduling](https://ieeexplore.ieee.org/abstract/document/9981025).
 Some files from the original repository do not work properly anymore.
 
 
@@ -13,8 +15,42 @@ License
 Because the simulator uses `pyss` (https://code.google.com/archive/p/pyss/), which was published under GNU GPL v2 license,
 the additions are published under the same license.
 
+DEBS'2024 changelog
+---------
 
-Changelog
+###  IBM ILOG CPLEX CPOptimizer
+
+The CP-based schedulers require [CP Optimizer](https://www.ibm.com/products/ilog-cplex-optimization-studio/cplex-cp-optimizer), which must be installed separately. The schedulers use the Python API of CPOptimizer `docplex` (see `./pyss/requirements.txt`). 
+
+
+### New sort order
+
+A new sort order, "Shortest runtime-area product first" (labeled `SRD2F`) is added to `pyss/schedulers/sorters.py` and can be used with any scheduler that uses sorters.
+
+
+### Constraint Programming (CP) based schedulers
+
+#### "Tuned" `pyss/schedulers/cplex_tuned_scheduler.py`
+
+The same scheduler can be configured to make a CP-based scheduler with any of the four objective functions. See examples of the configuration files in `configs/CPLEX_OF/` directory.
+
+#### "Best-of-N" (`pyss/schedulers/cplex_bestofn_scheduler.py`)
+
+The scheduler used to implement CP-BSLD+ and CP-P2SF+ algorithms. See the configuration files `configs/CPLEX_OF/BestOfN_BSLD_Clairvoyant.py` and `configs/CPLEX_OF/BestOfN_P2SF_Clairvoyant.py` for the details.
+
+#### Other schedulers
+
+`pyss/schedulers/cplex_basic_scheduler.py` and `pyss/schedulers/cplex_bestof2_scheduler.py` are earlier versions of the CP-based schedulers. They are not used in the paper.
+
+#### Checkpointing
+
+Some CP-based schedulers can be configured to use checkpointing (which is not a checkpointing but rather a journaling). The checkpointing is enabled by setting `use_checkpointing` to `True` in the configuration file. See `configs/CPLEX_OF/BestOfN_P2SF_Clairvoyant.py` for an example.
+
+When the checkpointing is enabled, the scheduler will save the state of the solver to the file with extention `.checkpointing` appended to the ouput file name. 
+When the scheduler is restarted, it checks if the checkpointing file exists and if it does, it will fast forward the previous decicions stored in the checkpointing file.
+
+
+ SBACPAD'2022 changelog
 ---------
 
 ### Modifications
@@ -139,7 +175,7 @@ Scripts used to analyze the results resides in `analysis` directory. Please see 
 The script `plot_frequent_job_history.py` (not used for the paper) is better suited to `analysis` directory but is located in `pyss` because it uses predictors from the simulator.  
 
 
-Original documentation (mostly outdated because the project structure is now different)
+SC'2015 documentation (mostly outdated because the project structure is now different)
 ======================
 
 Improving Backfilling by using Machine Learning to predict Running Times.

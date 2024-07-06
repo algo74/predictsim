@@ -10,6 +10,9 @@ class PredictorTsafrir(Predictor):
 		self.user_run_time_prev = {}
 		self.user_run_time_last = {}
 
+		## debug
+		self.fit_count = 0
+
 		if "predict_multiplier" in options["scheduler"]["predictor"].keys():
 			self.predict_multiplier = options["scheduler"]["predictor"]["predict_multiplier"]
 		else:
@@ -42,3 +45,7 @@ class PredictorTsafrir(Predictor):
 		assert self.user_run_time_prev.has_key(job.user_id) == True
 		self.user_run_time_prev[job.user_id] = self.user_run_time_last[job.user_id]
 		self.user_run_time_last[job.user_id] = job.actual_run_time
+
+		## debug
+		self.fit_count += 1
+		print("fit_count: " + self.fit_count)

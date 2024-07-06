@@ -60,7 +60,7 @@ col_names = [
 
 
 def Utilization(df, start, end, maxNodes):
-    """
+  """
 
     :param df: unfiltered input dataframe (which include 'Submit Time', 'Start Time', and 'Area')
     :param start: start time of the evaluated interval
@@ -68,71 +68,69 @@ def Utilization(df, start, end, maxNodes):
     :param maxNodes: the number of nodes in the cluster
     """
 
-    # Clip off either end.
-    # This way, we don't consider jobs' wait time outside of our interval.
-    startTimes = np.maximum(df['Start Time'], start)
-    endTimes = np.minimum(df['End Time'], end)
+  # Clip off either end.
+  # This way, we don't consider jobs' wait time outside of our interval.
+  startTimes = np.maximum(df['Start Time'], start)
+  endTimes = np.minimum(df['End Time'], end)
 
-    durations = np.maximum(endTimes - startTimes, 0)
-
-
-    utilization = np.sum((durations * df['Requested Number of Processors']).astype(np.float64)) / (maxNodes *(end - start))
-
-    return utilization
+  durations = np.maximum(endTimes - startTimes, 0)
 
 
+  utilization = np.sum((durations * df['Requested Number of Processors']).astype(np.float64)) / (maxNodes *(end - start))
 
-def calculate_metrics(in_file):
-    # extracting number of processors
-    numNodes = None
-    input_file = open(in_file)
-    for line in input_file:
-        if (line.lstrip().startswith(';')):
-            if (line.lstrip().startswith('; MaxProcs:')):
-                numNodes = int(line.strip()[11:])
-                break
-            else:
-                continue
-        else:
-            break
-    input_file.close()
-    assert numNodes is not None
+  return utilization
 
-    # read date and do the rest...
-    df = pd.read_csv(in_file, sep='\s+', comment=';',
-                     header=None, names=col_names)
-    df['Start Time'] = df['Submit Time'] + df['Wait Time']
-    df['End Time'] = df['Start Time'] + df['Run Time']
-    df['Flow'] = df['Wait Time'] + df['Run Time']
-    df['Area'] = df['Requested Number of Processors'] * df['Run Time']
 
-    # "..to reduce warmup and cooldown effects, the first 1 percent of terminated jobs
-    # and those terminating after the last arrival were not included .."
-    # https://doi.org/10.1109/TPDS.2007.70606
-    latest_good_time = df['Submit Time'].max()
-    # print ("Latest time: {}".format(latest_good_time))
-    end_times = sorted(df['End Time'])
-    earliest_good_time = end_times[len(end_times)//100]
 
-    # # uncomment in case we want to include all data
-    # latest_good_time = df['End Time'].max()
-    # earliest_good_time = df['Submit Time'].min()
+def calculate_different_utilizations(in_file):
+  # extracting number of processors
+  numNodes = None
+  input_file = open(in_file)
+  for line in input_file:
+    if (line.lstrip().startswith(';')):
+      if (line.lstrip().startswith('; MaxProcs:')):
+        numNodes = int(line.strip()[11:])
+        break
+      else:
+        continue
+    else:
+      break
+  input_file.close()
+  assert numNodes is not None
 
-    return Utilization(df, earliest_good_time, latest_good_time, numNodes)
+  # read date and do the rest...
+  df = pd.read_csv(in_file, sep='\s+', comment=';',
+                   header=None, names=col_names)
+  df['Start Time'] = df['Submit Time'] + df['Wait Time']
+  df['End Time'] = df['Start Time'] + df['Run Time']
+  df['Flow'] = df['Wait Time'] + df['Run Time']
+  df['Area'] = df['Requested Number of Processors'] * df['Run Time']
+
+  # "..to reduce warmup and cooldown effects, the first 1 percent of terminated jobs
+  # and those terminating after the last arrival were not included .."
+  # https://doi.org/10.1109/TPDS.2007.70606
+  latest_good_time = df['Submit Time'].max()
+  # print ("Latest time: {}".format(latest_good_time))
+  end_times = sorted(df['End Time'])
+  earliest_good_time = end_times[len(end_times)//100]
+  print("Utilization excluding 1% of first jobs and cooldown: {}".format(Utilization(df, earliest_good_time, latest_good_time, numNodes)))
+
+
+  print("Whole interval Utilization: {}".format(Utilization(df, df['Submit Time'].min(), df['End Time'].max(), numNodes)))
+
+  print("Utilization excluding cooldown: {}".format(Utilization(df, df['Submit Time'].min(), latest_good_time, numNodes)))
+
+  print("Utilization excluding warm-up: {}".format(Utilization(df, earliest_good_time, df['End Time'].max(), numNodes)))
 
 
 
 if __name__ == "__main__":
-    # Retrieve arguments
-    # arguments = docopt(__doc__, version='1.0.0rc2')
-    arguments, exception = docopt(__doc__, version='1.0.0rc2')
+  # Retrieve arguments
+  # arguments = docopt(__doc__, version='1.0.0rc2')
+  arguments, exception = docopt(__doc__, version='1.0.0rc2')
 
-    # print(arguments)
+  # print(arguments)
 
-    in_file = arguments['<swf_file>']
+  in_file = arguments['<swf_file>']
 
-    values = calculate_metrics(in_file)
-
-    print(values)
-
-
+  calculate_different_utilizations(in_file)

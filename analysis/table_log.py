@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import csv
 import os
+import sys
 
 
 class TableLog:
@@ -35,9 +36,14 @@ class TableLog:
       os.remove(filename)
 
   def log(self, data):
-    with open(self.filename, 'ab') as f:
-      w = csv.writer(f)
-      w.writerow(data)
+    if sys.version_info.major == 2:
+      with open(self.filename, 'ab') as f:
+        w = csv.writer(f)
+        w.writerow(data)
+    else:
+      with open(self.filename, 'a', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(data)
 
 
 class NoneLog:

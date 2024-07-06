@@ -52,6 +52,12 @@ def sorter_sjf(queue, cur_time):
   return sorted(queue, key=lambda job: (job.predicted_run_time, job.num_required_processors,))
 
 
+def sorter_srd2f(queue, cur_time):
+  return sorted(queue, key=lambda job: (job.num_required_processors * job.predicted_run_time * job.predicted_run_time,
+                                        job.num_required_processors * job.predicted_run_time,
+                                        job.submit_time))
+
+
 def sorter_none(queue, cur_time):
   return queue[:]
 
@@ -83,6 +89,7 @@ sorters = {
   'SAF': sorter_saf,
   'SRF': sorter_srf,
   'SJF': sorter_sjf,
+  'SRD2F': sorter_srd2f,
   'WFP': sorter_wfp,
   'None': sorter_none
 }
